@@ -16,6 +16,8 @@ class CreateRoomTest extends DuskTestCase
     {
         $faker = $this->faker;
 
+        print "Room will be " . $faker->word . "\n";
+
         $this->browse(function (Browser $browser) use ($faker) {
             $browser->visit('/')
                 ->assertSee('Simple Pointer')

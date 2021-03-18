@@ -42,3 +42,20 @@ services:
       - ./.docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
     networks:
       - laravel
+
+    # if you are developing on a Linux server you might want these to help run tests
+    # modified instructions from here: https://medium.com/@scuttlebyte/running-headless-laravel-dusk-3-0-tests-in-docker-environments-f396752a9ffe
+  selenium:
+    image: selenium/standalone-chrome
+    depends_on:
+      - app
+    # used shared memory to run as opposed to assuming /dev/shm is there to be mounted
+    shm_size: '2gb'
+    container_name: selenium
+    ports:
+      - "4444:4444"
+    links:
+      - nginx:planningpoker.test
+    # how I want to find the webserver
+    networks:
+      - laravel
