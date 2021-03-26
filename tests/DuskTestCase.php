@@ -53,7 +53,8 @@ abstract class DuskTestCase extends BaseTestCase
         // use selenium if supposed to
         if (env('USE_SELENIUM', 'false') == 'true') {
             return RemoteWebDriver::create(
-                'http://selenium:4444/wd/hub',
+                //'http://selenium:4444/wd/hub',
+                'http://chrome:3000/webdriver',
                 DesiredCapabilities::chrome()->setCapability(
                     ChromeOptions::CAPABILITY,
                     $options
