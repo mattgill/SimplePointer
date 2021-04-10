@@ -48,5 +48,7 @@ services:
         - '/dev/shm:/dev/shm'
     links:
       - 'nginx:simplepointer.test'
+    # needs a little breathing room when running tests
+    shm_size: '512mb'
     networks:
       - laravel
