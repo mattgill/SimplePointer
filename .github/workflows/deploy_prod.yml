@@ -7,17 +7,22 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        php-versions: ["7.4"]
+
     steps:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Copy .env
-        run: cp .env.dusk.local .env
+      - name: Setup .env
+        run: cp .env.dusk.ci .env
 
       - name: Setup PHP Action
-        uses: shivammathur/setup-php@2.9.0 #https://github.com/shivammathur/setup-php
+        uses: shivammathur/setup-php@v2 #https://github.com/shivammathur/setup-php
         with:
-          php-version: 7.4
+          php-version: ${{ matrix.php-versions }}
           Extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite
           coverage: none
 
@@ -36,13 +41,13 @@ jobs:
           restore-keys: ${{ runner.os }}-composer-
 
       - name: Install Dependencies (PHP vendors)
-        run: composer install -q --no-ansi --no-interaction --no-scripts --no-suggest --no-progress --prefer-dist
+        run: composer install --no-progress --no-suggest --prefer-dist --optimize-autoloader
 
       - name: Generate key
         run: php artisan key:generate
 
       - name: Run CS Fixer
-        uses: OskarStark/php-cs-fixer-ga@2.16.4
+        uses: docker://oskarstark/php-cs-fixer-ga
 
       - name: Get npm cache directory
         uses: actions/cache@v2
@@ -56,7 +61,6 @@ jobs:
         run: |
           npm install
           npm run prod
-          cat public/mix-manifest.json # See asset versions in log
 
       - name: Upload build files
         uses: actions/upload-artifact@v1
@@ -86,9 +90,7 @@ jobs:
         run: ./vendor/laravel/dusk/bin/chromedriver-linux > /dev/null 2>&1 &
 
       - name: Run Laravel Server
-        env:
-          PUHSER_HOST: 127.0.0.1 # Set the pusher host for github actions
-        run: php artisan serve > /dev/null 2>&1 &
+        run: php artisan serve --no-reload &
 
       - name: Run Websockets Server
         run: php artisan websockets:serve > /dev/null 2>&1 &
@@ -109,7 +111,7 @@ jobs:
           path: public
 
       - name: Setup PHP Action
-        uses: shivammathur/setup-php@2.9.0 #https://github.com/shivammathur/setup-php
+        uses: shivammathur/setup-php@v2 #https://github.com/shivammathur/setup-php
         with:
           php-version: 7.4
           Extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite
