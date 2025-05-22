@@ -51,12 +51,11 @@ abstract class DuskTestCase extends BaseTestCase
         ]);
 
         /**
-         * Use Selenium docker image for dusk tests when developing.
-         * APP_URL = http://simplepointer.test for docker
+         * Use Selenium docker image for dusk tests when developing via Dusk CI var.
          */
-        if (env('APP_URL') === 'http://simplepointer.test') {
+        if (env('USE_SELENIUM', 'false') == 'true') {
             return RemoteWebDriver::create(
-                'http://selenium:4444/wd/hub',
+                'http://selenium:4444',
                 DesiredCapabilities::chrome()->setCapability(
                     ChromeOptions::CAPABILITY,
                     $options

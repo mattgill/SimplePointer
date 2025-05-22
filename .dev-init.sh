@@ -3,7 +3,11 @@
 # get to this script so commands run right
 cd $(dirname $0)
 
-docker ps -a --format "{{.ID}} {{.Image}}" | awk '$2 ~ /^simplepointer_/ {print $1}' | xargs docker rm -f
+if [ $(docker ps -a --format '{{.ID}} {{.Names}}' | grep simplepointer_ | wc -l) -gt 0 ]; then
+    # to dev null because we don't need to see the IDs of each killed container
+    docker ps -a --format '{{.ID}} {{.Names}}' | grep simplepointer_ | cut -d' ' -f1 | xargs docker rm -f > /dev/null
+    echo "App containers forcefully removed"
+fi
 
 # (re)build service images
 docker compose build
@@ -24,8 +28,8 @@ if [ ! -e .env ]; then
 fi;
 
 # create a sqlite file
-mkdir -p storage
-sudo chown -R $(whoami):$(whoami) storage
+#mkdir -p storage
+#sudo chown -R $(whoami):$(whoami) storage
 touch storage/database.sqlite
 chmod -R 775 storage
 
@@ -43,3 +47,6 @@ docker compose exec app chown -R www-data:www-data /var/www/html/storage
 
 # generate key
 docker compose exec app php artisan key:generate
+
+# if we want to run tests
+#docker compose exec app php artisan dusk --env=dusk.local
