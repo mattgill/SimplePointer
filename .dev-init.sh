@@ -3,6 +3,8 @@
 # get to this script so commands run right
 cd $(dirname $0)
 
+docker compose down
+
 if [ $(docker ps -a --format '{{.ID}} {{.Names}}' | grep simplepointer_ | wc -l) -gt 0 ]; then
     # to dev null because we don't need to see the IDs of each killed container
     docker ps -a --format '{{.ID}} {{.Names}}' | grep simplepointer_ | cut -d' ' -f1 | xargs docker rm -f > /dev/null

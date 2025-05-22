@@ -55,11 +55,13 @@ abstract class DuskTestCase extends BaseTestCase
          */
         if (env('USE_SELENIUM', 'false') == 'true') {
             return RemoteWebDriver::create(
-                'http://selenium:4444',
-                DesiredCapabilities::chrome()->setCapability(
+                'http://selenium:4444'
+                , DesiredCapabilities::chrome()->setCapability(
                     ChromeOptions::CAPABILITY,
                     $options
                 )
+                , 100000 // ms connection timeout
+                , 100000 // ms request timeout
             );
         }
 

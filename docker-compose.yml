@@ -51,7 +51,7 @@ services:
     depends_on:
       - app
     # used shared memory to run as opposed to assuming /dev/shm is there to be mounted
-    shm_size: '2gb'
+    shm_size: '4gb'
     ports:
       - "4444:4444"
     links:
