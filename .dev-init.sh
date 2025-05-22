@@ -3,11 +3,13 @@
 # get to this script so commands run right
 cd $(dirname $0)
 
+docker ps -a --format "{{.ID}} {{.Image}}" | awk '$2 ~ /^simplepointer_/ {print $1}' | xargs docker rm -f
+
 # (re)build service images
-docker-compose build
+docker compose build
 
 # start services detached
-docker-compose up -d
+docker compose up -d
 
 # create an env file with keys if we don't have one
 if [ ! -e .env ]; then
@@ -22,19 +24,22 @@ if [ ! -e .env ]; then
 fi;
 
 # create a sqlite file
+mkdir -p storage
+sudo chown -R $(whoami):$(whoami) storage
 touch storage/database.sqlite
-chmod 755 storage/database.sqlite
+chmod -R 775 storage
+
 
 # now inside the container stand things up with composer and npm. you'd test changes with the following three as well.
-docker-compose exec app composer install
-docker-compose exec app npm install
-docker-compose exec app npm run dev
+docker compose exec app composer install
+docker compose exec app npm install
+docker compose exec app npm run dev
 
 # put stuff in the db
-docker-compose exec app php artisan migrate --seed
+docker compose exec app php artisan migrate --seed
 
 # and we have to get ownership of storage in line with server. local user won't be able to write but that shouldn't matter.
-docker-compose exec app chown -R www-data:www-data /var/www/html/storage
+docker compose exec app chown -R www-data:www-data /var/www/html/storage
 
 # generate key
-docker-compose exec app php artisan key:generate
+docker compose exec app php artisan key:generate
